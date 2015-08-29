@@ -31,8 +31,11 @@ import java.util.Collections;
 import java.util.Map;
 
 /**
- * Base class for all network requests.
- *
+ * Base class for all network requests.<br />
+ * 代表一个网络请求的抽象类。我们通过构建一个Request类的非抽象子类(StringRequest、JsonRequest、ImageRequest 或自定义)对象，
+ * 并将其加入到·RequestQueue·中来完成一次网络请求操作。<br />
+ * Volley 支持 8 种 Http 请求方式 GET, POST, PUT, DELETE, HEAD, OPTIONS, TRACE, PATCH <br />
+ * Request 类中包含了请求 url，请求请求方式，请求 Header，请求 Body，请求的优先级等信息。
  * @param <T> The type of parsed response this request expects.
  */
 public abstract class Request<T> implements Comparable<Request<T>> {
@@ -526,7 +529,9 @@ public abstract class Request<T> implements Comparable<Request<T>> {
      * Subclasses must implement this to parse the raw network response
      * and return an appropriate response type. This method will be
      * called from a worker thread.  The response will not be delivered
-     * if you return null.
+     * if you return null.<br />
+     * 子类重写此方法，将网络返回的原生字节内容，转换成合适的类型。此方法会在工作线程中被调用。
+     * 返回为null的话response不会被分发
      * @param response Response from the network
      * @return The parsed response, or null in the case of an error
      */
@@ -547,7 +552,8 @@ public abstract class Request<T> implements Comparable<Request<T>> {
     /**
      * Subclasses must implement this to perform delivery of the parsed
      * response to their listeners.  The given response is guaranteed to
-     * be non-null; responses that fail to parse are not delivered.
+     * be non-null; responses that fail to parse are not delivered.<br />
+     * 子类重写此方法，将解析成合适类型的内容传递给它们的监听回调。
      * @param response The parsed response returned by
      * {@link #parseNetworkResponse(NetworkResponse)}
      */

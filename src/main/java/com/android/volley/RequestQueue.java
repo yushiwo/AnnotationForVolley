@@ -31,8 +31,8 @@ import java.util.concurrent.PriorityBlockingQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * A request dispatch queue with a thread pool of dispatchers.
- *
+ * A request dispatch queue with a thread pool of dispatchers. <br />
+ * 请求分发队列，通过线程池进行请求分发
  * Calling {@link #add(Request)} will enqueue the given Request for dispatch,
  * resolving from either cache or network on a worker thread, and then delivering
  * a parsed response on the main thread.
@@ -50,7 +50,7 @@ public class RequestQueue {
 
     /**
      * Staging area for requests that already have a duplicate request in flight.
-     *
+     * 等待请求的集合，如果一个请求正在被处理并且可以被缓存，后续的相同 url 的请求，将进入此等待队列。
      * <ul>
      *     <li>containsKey(cacheKey) indicates that there is a request in flight for the given cache
      *          key.</li>
@@ -65,18 +65,28 @@ public class RequestQueue {
      * The set of all requests currently being processed by this RequestQueue. A Request
      * will be in this set if it is waiting in any queue or currently being processed by
      * any dispatcher.
+     * 正在进行中，尚未完成的请求集合
      */
     private final Set<Request<?>> mCurrentRequests = new HashSet<Request<?>>();
 
-    /** The cache triage queue. */
+    /**
+     * The cache triage queue.
+     * 缓存请求队列
+     */
     private final PriorityBlockingQueue<Request<?>> mCacheQueue =
         new PriorityBlockingQueue<Request<?>>();
 
-    /** The queue of requests that are actually going out to the network. */
+    /**
+     * The queue of requests that are actually going out to the network.
+     * 网络请求队列
+     */
     private final PriorityBlockingQueue<Request<?>> mNetworkQueue =
         new PriorityBlockingQueue<Request<?>>();
 
-    /** Number of network request dispatcher threads to start. */
+    /**
+     * Number of network request dispatcher threads to start.
+     * 默认启动的网络请求分发线程数
+     */
     private static final int DEFAULT_NETWORK_THREAD_POOL_SIZE = 4;
 
     /** Cache interface for retrieving and storing responses. */

@@ -27,6 +27,9 @@ import com.android.volley.RequestQueue;
 
 import java.io.File;
 
+/**
+ * 构建一个可用于添加网络请求的RequestQueue对象
+ */
 public class Volley {
 
     /** Default on-disk cache directory. */
@@ -41,7 +44,7 @@ public class Volley {
      */
     public static RequestQueue newRequestQueue(Context context, HttpStack stack) {
         File cacheDir = new File(context.getCacheDir(), DEFAULT_CACHE_DIR);
-
+        //userAgent定义，异常则使用默认的
         String userAgent = "volley/0";
         try {
             String packageName = context.getPackageName();
@@ -59,9 +62,9 @@ public class Volley {
                 stack = new HttpClientStack(AndroidHttpClient.newInstance(userAgent));
             }
         }
-
+        //构造一个代表网络（Network）的具体实现BasicNetwork
         Network network = new BasicNetwork(stack);
-
+        //将网络（Network）对象和缓存（Cache）对象传入构建一个 RequestQueue，启动这个 RequestQueue，并返回
         RequestQueue queue = new RequestQueue(new DiskBasedCache(cacheDir), network);
         queue.start();
 
