@@ -27,22 +27,38 @@ import java.util.concurrent.BlockingQueue;
  * Any deliverable response is posted back to the caller via a
  * {@link ResponseDelivery}.  Cache misses and responses that require
  * refresh are enqueued on the specified network queue for processing
- * by a {@link NetworkDispatcher}.
+ * by a {@link NetworkDispatcher}.<br />
+ *
+ * 一个线程，用于调度处理走缓存的请求。启动后，会不断从缓存请求队列中取请求处理，队列为空则等待，请求处理结束则将结果
+ * 传递给ResponseDelivery去执行后续处理。当结果未缓存、缓存失效或者缓存需要刷新的情况下，该请求需要重新进入NetworkDispatcher
+ * 去调度处理
  */
 public class CacheDispatcher extends Thread {
 
     private static final boolean DEBUG = VolleyLog.DEBUG;
 
     /** The queue of requests coming in for triage. */
+    /**
+     * 缓存请求队列
+     */
     private final BlockingQueue<Request<?>> mCacheQueue;
 
     /** The queue of requests going out to the network. */
+    /**
+     * 网络请求队列
+     */
     private final BlockingQueue<Request<?>> mNetworkQueue;
 
     /** The cache to read from. */
+    /**
+     * 缓存类，代表了可以获取请求结果，存储请求结果的缓存
+     */
     private final Cache mCache;
 
     /** For posting responses. */
+    /**
+     * 请求结果传递类
+     */
     private final ResponseDelivery mDelivery;
 
     /** Used for telling us to die. */
@@ -81,24 +97,24 @@ public class CacheDispatcher extends Thread {
         Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
 
         // Make a blocking call to initialize the cache.
-        mCache.initialize();
+        mCache.initialize();   //初始化缓存
 
         while (true) {
             try {
                 // Get a request from the cache triage queue, blocking until
                 // at least one is available.
-                final Request<?> request = mCacheQueue.take();
+                final Request<?> request = mCacheQueue.take();  //从缓存队列mCacheQueue取一个Request
                 request.addMarker("cache-queue-take");
 
                 // If the request has been canceled, don't bother dispatching it.
-                if (request.isCanceled()) {
+                if (request.isCanceled()) {  //请求取消，则结束请求，进入下一次循环
                     request.finish("cache-discard-canceled");
                     continue;
                 }
 
                 // Attempt to retrieve this item from cache.
-                Cache.Entry entry = mCache.get(request.getCacheKey());
-                if (entry == null) {
+                Cache.Entry entry = mCache.get(request.getCacheKey());  //从缓存mCache中获取响应结果
+                if (entry == null) {  //缓存结果不存在，将请求加入网络队列mNetworkQueue中；进入下一次循环
                     request.addMarker("cache-miss");
                     // Cache miss; send off to the network dispatcher.
                     mNetworkQueue.put(request);
@@ -106,7 +122,7 @@ public class CacheDispatcher extends Thread {
                 }
 
                 // If it is completely expired, just send it to the network.
-                if (entry.isExpired()) {
+                if (entry.isExpired()) {  //缓存结果过期，将请求加入网络队列mNetworkQueue中；进入下一次循环
                     request.addMarker("cache-hit-expired");
                     request.setCacheEntry(entry);
                     mNetworkQueue.put(request);
@@ -114,15 +130,16 @@ public class CacheDispatcher extends Thread {
                 }
 
                 // We have a cache hit; parse its data for delivery back to the request.
+                //解析缓存结果为response
                 request.addMarker("cache-hit");
                 Response<?> response = request.parseNetworkResponse(
                         new NetworkResponse(entry.data, entry.responseHeaders));
                 request.addMarker("cache-hit-parsed");
 
-                if (!entry.refreshNeeded()) {
+                if (!entry.refreshNeeded()) {  //缓存结果不需要刷新，则直接传输响应结果
                     // Completely unexpired cache hit. Just deliver the response.
                     mDelivery.postResponse(request, response);
-                } else {
+                } else {   //缓存结果需要刷新，则传输响应结果，并将Request加入到mNetworkQueue做新鲜度验证
                     // Soft-expired cache hit. We can deliver the cached response,
                     // but we need to also send the request to the network for
                     // refreshing.

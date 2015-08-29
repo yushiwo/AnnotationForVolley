@@ -39,7 +39,8 @@ import java.util.Map;
 
 /**
  * Cache implementation that caches files directly onto the hard disk in the specified
- * directory. The default disk usage size is 5MB, but is configurable.
+ * directory. The default disk usage size is 5MB, but is configurable.<br />
+ * 继承Cache类，基于Disk的缓存实现类
  */
 public class DiskBasedCache implements Cache {
 
@@ -102,6 +103,7 @@ public class DiskBasedCache implements Cache {
 
     /**
      * Returns the cache entry with the specified key if it exists, null otherwise.
+     * 从缓存中得到数据。先从摘要信息中得到摘要信息，然后读取缓存数据文件到内容
      */
     @Override
     public synchronized Entry get(String key) {
@@ -135,7 +137,8 @@ public class DiskBasedCache implements Cache {
 
     /**
      * Initializes the DiskBasedCache by scanning for all files currently in the
-     * specified root directory. Creates the root directory if necessary.
+     * specified root directory. Creates the root directory if necessary.<br />
+     * 扫描缓存目录，得到所有缓存数据摘要信息放入缓存
      */
     @Override
     public synchronized void initialize() {
@@ -190,7 +193,9 @@ public class DiskBasedCache implements Cache {
     }
 
     /**
-     * Puts the entry with the specified key into the cache.
+     * Puts the entry with the specified key into the cache.<br />
+     * 将数据存入缓存。先检查缓存是否会满，否则先删除缓存中部分数据，然后再新建缓存文件
+     *
      */
     @Override
     public synchronized void put(String key, Entry entry) {
@@ -250,7 +255,8 @@ public class DiskBasedCache implements Cache {
     }
 
     /**
-     * Prunes the cache to fit the amount of bytes specified.
+     * Prunes the cache to fit the amount of bytes specified.<br />
+     * 检查是否能再分配neededSpace字节的空间，如果不能则删除缓存中部分数据
      * @param neededSpace The amount of bytes we are trying to fit into the cache.
      */
     private void pruneIfNeeded(int neededSpace) {
@@ -334,6 +340,7 @@ public class DiskBasedCache implements Cache {
 
     /**
      * Handles holding onto the cache headers for an entry.
+     * 缓存文件摘要信息，存储在缓存文件的头部，与Cache.Entry相似
      */
     // Visible for testing.
     static class CacheHeader {
