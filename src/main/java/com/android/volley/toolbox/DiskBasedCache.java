@@ -49,15 +49,27 @@ public class DiskBasedCache implements Cache {
             new LinkedHashMap<String, CacheHeader>(16, .75f, true);
 
     /** Total amount of space currently used by the cache in bytes. */
+    /**
+     * 总共使用的缓存空间，单位是字节
+     */
     private long mTotalSize = 0;
 
     /** The root directory to use for the cache. */
+    /**
+     * 缓存的根目录
+     */
     private final File mRootDirectory;
 
     /** The maximum size of the cache in bytes. */
+    /**
+     * 磁盘缓存的最大容量，单位是字节
+     */
     private final int mMaxCacheSizeInBytes;
 
     /** Default maximum disk usage in bytes. */
+    /**
+     * 默认磁盘最大容量，5MB
+     */
     private static final int DEFAULT_DISK_USAGE_BYTES = 5 * 1024 * 1024;
 
     /** High water mark percentage for the cache */
@@ -86,7 +98,8 @@ public class DiskBasedCache implements Cache {
     }
 
     /**
-     * Clears the cache. Deletes all cached files from disk.
+     * Clears the cache. Deletes all cached files from disk.<br />
+     * 清空磁盘缓存
      */
     @Override
     public synchronized void clear() {
@@ -314,6 +327,10 @@ public class DiskBasedCache implements Cache {
     /**
      * Removes the entry identified by 'key' from the cache.
      */
+    /**
+     * 移除某个缓存数据
+     * @param key
+     */
     private void removeEntry(String key) {
         CacheHeader entry = mEntries.get(key);
         if (entry != null) {
@@ -388,7 +405,8 @@ public class DiskBasedCache implements Cache {
         }
 
         /**
-         * Reads the header off of an InputStream and returns a CacheHeader object.
+         * Reads the header off of an InputStream and returns a CacheHeader object.<br />
+         * 读取摘要信息，返回CacheHeader对象
          * @param is The InputStream to read from.
          * @throws IOException
          */
@@ -416,6 +434,11 @@ public class DiskBasedCache implements Cache {
         /**
          * Creates a cache entry for the specified data.
          */
+        /**
+         * 通过data生成一个缓存实体
+         * @param data
+         * @return
+         */
         public Entry toCacheEntry(byte[] data) {
             Entry e = new Entry();
             e.data = data;
@@ -431,6 +454,11 @@ public class DiskBasedCache implements Cache {
 
         /**
          * Writes the contents of this CacheHeader to the specified OutputStream.
+         */
+        /**
+         * 将摘要信息实体写入到输出流中
+         * @param os
+         * @return
          */
         public boolean writeHeader(OutputStream os) {
             try {

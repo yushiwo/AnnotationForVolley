@@ -26,7 +26,8 @@ import java.util.Map;
  */
 public class NetworkResponse {
     /**
-     * Creates a new network response.
+     * Creates a new network response.<br />
+     * Network中方法performRequest的返回值，Request的parseNetworkResponse(...)方法入参，是Volley中用于内部Response转换的一级
      * @param statusCode the HTTP status code
      * @param data Response body
      * @param headers Headers returned with this response, or null for none
@@ -56,18 +57,33 @@ public class NetworkResponse {
     }
 
     /** The HTTP status code. */
+    /**
+     * Http响应状态码
+     */
     public final int statusCode;
 
     /** Raw data from this response. */
+    /**
+     * 数据
+     */
     public final byte[] data;
 
     /** Response headers. */
+    /**
+     * 响应Headers
+     */
     public final Map<String, String> headers;
 
     /** True if the server returned a 304 (Not Modified). */
+    /**
+     * 表示是否为304响应
+     */
     public final boolean notModified;
 
     /** Network roundtrip time in milliseconds. */
+    /**
+     * 请求耗时
+     */
     public final long networkTimeMs;
 }
 

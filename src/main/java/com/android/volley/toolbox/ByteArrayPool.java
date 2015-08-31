@@ -51,12 +51,26 @@ import java.util.List;
  * certain byte limit. When a buffer is returned that would cause the pool to exceed the limit,
  * least-recently-used buffers are disposed.
  */
+
+/**
+ * byte[]的回收池，用于byte[]的回收再利用，减少了内存的分配和回收。主要通过一个元素长度从小到大
+ * 排序的ArrayList作为byte[]的缓存，另一个按照使用时间先后排序的ArrayList属性，用于缓存满时清理元素
+ */
 public class ByteArrayPool {
     /** The buffer pool, arranged both by last use and by buffer size */
+    /**
+     * 按照使用时间排序的buf
+     */
     private List<byte[]> mBuffersByLastUse = new LinkedList<byte[]>();
+    /**
+     * 按照大小排序的buf
+     */
     private List<byte[]> mBuffersBySize = new ArrayList<byte[]>(64);
 
     /** The total size of the buffers in the pool */
+    /**
+     * 池子中所有缓存的总大小
+     */
     private int mCurrentSize = 0;
 
     /**
@@ -88,6 +102,11 @@ public class ByteArrayPool {
      *        larger.
      * @return a byte[] buffer is always returned.
      */
+    /**
+     * 获取长度不小于len的byte[]，遍历缓存，找出第一个长度大于传入参数len的byte[]，并返回；如果没有，则new一个返回
+     * @param len
+     * @return
+     */
     public synchronized byte[] getBuf(int len) {
         for (int i = 0; i < mBuffersBySize.size(); i++) {
             byte[] buf = mBuffersBySize.get(i);
@@ -104,6 +123,8 @@ public class ByteArrayPool {
     /**
      * Returns a buffer to the pool, throwing away old buffers if the pool would exceed its allotted
      * size.
+     *
+     * 将用过的byte[]进行回收，根据byte[]长度按照从小到大的排序将byte[]插入到缓存中合适的位置
      *
      * @param buf the buffer to return to the pool.
      */
@@ -123,6 +144,7 @@ public class ByteArrayPool {
 
     /**
      * Removes buffers from the pool until it is under its size limit.
+     * 当缓存的byte超过预先设置的大小时，按照先进先出的原则，删除最早的byte[]
      */
     private synchronized void trim() {
         while (mCurrentSize > mSizeLimit) {

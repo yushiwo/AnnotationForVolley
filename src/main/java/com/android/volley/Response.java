@@ -17,7 +17,8 @@
 package com.android.volley;
 
 /**
- * Encapsulates a parsed response for delivery.
+ * Encapsulates a parsed response for delivery. <br />
+ * 封装了经过解析后的数据，用于传输。并且有两个内部接口Listener和ErrorListener分别可以表示请求失败和成功后的回调
  *
  * @param <T> Parsed type of this response
  */

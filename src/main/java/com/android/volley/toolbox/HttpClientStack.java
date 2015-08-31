@@ -45,7 +45,8 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * An HttpStack that performs request over an {@link HttpClient}.
+ * An HttpStack that performs request over an {@link HttpClient}.<br />
+ * 实现HttpStack接口，利用Apache的HttpClient进行各种请求方式的请求
  */
 public class HttpClientStack implements HttpStack {
     protected final HttpClient mClient;
@@ -143,6 +144,12 @@ public class HttpClientStack implements HttpStack {
         }
     }
 
+    /**
+     * 设置请求消息的body
+     * @param httpRequest
+     * @param request
+     * @throws AuthFailureError
+     */
     private static void setEntityIfNonEmptyBody(HttpEntityEnclosingRequestBase httpRequest,
             Request<?> request) throws AuthFailureError {
         byte[] body = request.getBody();
@@ -156,6 +163,7 @@ public class HttpClientStack implements HttpStack {
      * Called before the request is executed using the underlying HttpClient.
      *
      * <p>Overwrite in subclasses to augment the request.</p>
+     * 发送请求之前调用，子类可重写实现自己的逻辑
      */
     protected void onPrepareRequest(HttpUriRequest request) throws IOException {
         // Nothing.

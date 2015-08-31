@@ -26,6 +26,8 @@ import java.util.Map;
 
 /**
  * An HTTP stack abstraction.
+ * 用于处理Http请求，返回请求结果的接口。目前Volley中的实现有基于HttpURLConnection的HurlStack
+ * 和基于Apache HttpClinet的HttpClientStack
  */
 public interface HttpStack {
     /**

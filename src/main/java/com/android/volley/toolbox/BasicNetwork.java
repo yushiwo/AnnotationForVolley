@@ -51,7 +51,13 @@ import java.util.Map;
 import java.util.TreeMap;
 
 /**
- * A network performing Volley requests over an {@link HttpStack}.
+ * A network performing Volley requests over an {@link HttpStack}. <br />
+ * volley中默认的网络接口实现类，调用HttpStack处理请求，并将结果转换为可被ResponseDelivery处理的NetworkResponse。
+ * 主要实现以下功能：<br />
+ * (1)利用HttpStack执行网络请求<br />
+ * (2)如果Request中带有实体信息，如Etag，Last-Modify等，则进行缓存新鲜度验证，并处理304<br />
+ * (3)如果发生超时，认证失败等错误，进行重试操作，直到成功、抛出异常（不满足重试策略等）结束<br />
+ *
  */
 public class BasicNetwork implements Network {
     protected static final boolean DEBUG = VolleyLog.DEBUG;
@@ -99,7 +105,7 @@ public class BasicNetwork implements Network {
 
                 responseHeaders = convertHeaders(httpResponse.getAllHeaders());
                 // Handle cache validation.
-                if (statusCode == HttpStatus.SC_NOT_MODIFIED) {
+                if (statusCode == HttpStatus.SC_NOT_MODIFIED) {  //处理304
 
                     Entry entry = request.getCacheEntry();
                     if (entry == null) {
@@ -170,7 +176,8 @@ public class BasicNetwork implements Network {
     }
 
     /**
-     * Logs requests that took over SLOW_REQUEST_THRESHOLD_MS to complete.
+     * Logs requests that took over SLOW_REQUEST_THRESHOLD_MS to complete. <br />
+     * 打印响应视觉较久的请求与响应相关信息
      */
     private void logSlowRequests(long requestLifetime, Request<?> request,
             byte[] responseContents, StatusLine statusLine) {
