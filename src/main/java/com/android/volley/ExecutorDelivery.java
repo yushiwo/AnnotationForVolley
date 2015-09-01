@@ -22,6 +22,8 @@ import java.util.concurrent.Executor;
 
 /**
  * Delivers responses and errors.
+ * 请求结果传输接口具体实现类。在Handler对应线程中传输，缓存调度线程或者网络调度线程中产生的请求结果或者请求错误；会在请求
+ * 成功的情况下调用Request.deliverResponse(...)函数，失败时调用Request.deliverError(...)函数
  */
 public class ExecutorDelivery implements ResponseDelivery {
     /** Used for posting responses, typically to the main thread. */
@@ -89,12 +91,14 @@ public class ExecutorDelivery implements ResponseDelivery {
         @Override
         public void run() {
             // If this request has canceled, finish it and don't deliver.
+            //请求被取消了，则结束请求，不再传输响应
             if (mRequest.isCanceled()) {
                 mRequest.finish("canceled-at-delivery");
                 return;
             }
 
             // Deliver a normal response or error, depending.
+            //根据状态，判断传输普通的响应还是错误
             if (mResponse.isSuccess()) {
                 mRequest.deliverResponse(mResponse.result);
             } else {
@@ -103,6 +107,7 @@ public class ExecutorDelivery implements ResponseDelivery {
 
             // If this is an intermediate response, add a marker, otherwise we're done
             // and the request can be finished.
+            //如果是中间的响应，则添加一个标记；否则结束请求
             if (mResponse.intermediate) {
                 mRequest.addMarker("intermediate-response");
             } else {

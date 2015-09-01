@@ -231,6 +231,13 @@ public class BasicNetwork implements Network {
     }
 
     /** Reads the contents of HttpEntity into a byte[]. */
+    /**
+     * 转化entity为字节
+     * @param entity
+     * @return
+     * @throws IOException
+     * @throws ServerError
+     */
     private byte[] entityToBytes(HttpEntity entity) throws IOException, ServerError {
         PoolingByteArrayOutputStream bytes =
                 new PoolingByteArrayOutputStream(mPool, (int) entity.getContentLength());

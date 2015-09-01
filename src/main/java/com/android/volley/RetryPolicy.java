@@ -18,21 +18,25 @@ package com.android.volley;
 
 /**
  * Retry policy for a request.
+ * 请求重试策略接口
  */
 public interface RetryPolicy {
 
     /**
      * Returns the current timeout (used for logging).
+     * 获取当前请求用时（用于log）
      */
     public int getCurrentTimeout();
 
     /**
      * Returns the current retry count (used for logging).
+     * 获取已经重试的次数（用于log）
      */
     public int getCurrentRetryCount();
 
     /**
-     * Prepares for the next retry by applying a backoff to the timeout.
+     * Prepares for the next retry by applying a backoff to the timeout.  <br />
+     * 确定是否重试，参数为这次异常的具体信息。在请求异常时，此接口会被调用。可在此函数实现中抛出传入的异常表示停止重试
      * @param error The error code of the last attempt.
      * @throws VolleyError In the event that the retry could not be performed (for example if we
      * ran out of attempts), the passed in error is thrown.

@@ -26,6 +26,8 @@ import java.io.UnsupportedEncodingException;
 
 /**
  * A canned request for retrieving the response body at a given URL as a String.
+ * 继承Request类，代表了一个返回值为String的请求。将网络返回的结果数据解析为String类型，通过构造
+ * 函数的Listener传参，支持请求成功后的onResponse(...)回调
  */
 public class StringRequest extends Request<String> {
     private final Listener<String> mListener;

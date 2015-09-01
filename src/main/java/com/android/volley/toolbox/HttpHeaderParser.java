@@ -27,11 +27,19 @@ import java.util.Map;
 
 /**
  * Utility methods for parsing HTTP headers.
+ * Http Header的解析工具类，在Volley中的主要作用是用于解析Header，从而判断返回结果是否需要缓存，如果需要返回Header
+ * 中的相关信息
  */
 public class HttpHeaderParser {
 
     /**
-     * Extracts a {@link Cache.Entry} from a {@link NetworkResponse}.
+     * Extracts a {@link Cache.Entry} from a {@link NetworkResponse}.<br />
+     * 比较重要的方法，通过网络响应中的缓存控制Header和Body的内容，构建缓存实体。如果Header的Cache-Control字段含有no-cache
+     * 或no-store表示不缓存，返回null <br />
+     *
+     * (1)根据Date首部，获取响应生成时间 <br />
+     * (2)根据Etag，获取响应实体标签 <br />
+     * (3)根据Cache-Control和Expires首部，计算出缓存的过期时间和缓存的新鲜度时间 <br />
      *
      * @param response The network response to parse headers from
      * @return a cache entry for the given response, or null if the response is not cacheable.
@@ -121,7 +129,8 @@ public class HttpHeaderParser {
     }
 
     /**
-     * Parse date in RFC1123 format, and return its value as epoch
+     * Parse date in RFC1123 format, and return its value as epoch  <br />
+     * 解析时间，将RFC1123的时间格式，解析成epoch时间
      */
     public static long parseDateAsEpoch(String dateStr) {
         try {
@@ -135,6 +144,7 @@ public class HttpHeaderParser {
 
     /**
      * Retrieve a charset from headers
+     * 解析编码集，在Content-Type首部中获取编码集。如果没有找到，默认返回ISO-8859-1
      *
      * @param headers An {@link java.util.Map} of headers
      * @param defaultCharset Charset to return if none can be found

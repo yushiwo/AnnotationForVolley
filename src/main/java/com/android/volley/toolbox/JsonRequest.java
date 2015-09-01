@@ -27,7 +27,9 @@ import java.io.UnsupportedEncodingException;
 
 /**
  * A request for retrieving a T type response body at a given URL that also
- * optionally sends along a JSON body in the request specified.
+ * optionally sends along a JSON body in the request specified.<br />
+ *
+ * 抽象类，继承自Request，代表了body为JSON的请求。提供了构建JSON请求参数的方法
  *
  * @param <T> JSON type of response expected
  */

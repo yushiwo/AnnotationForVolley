@@ -22,11 +22,16 @@ import java.io.IOException;
 /**
  * A variation of {@link java.io.ByteArrayOutputStream} that uses a pool of byte[] buffers instead
  * of always allocating them fresh, saving on heap churn.
+ * 继承ByteArrayOutputStream。原始的ByteArrayOutputStream中用于接收写入的bytes的buf，每次空间不足时便会new
+ * 更大容量的byte[]，而PoolingByteArrayOutputStream使用了ByteArrayPool作为Byte[]缓存来减少这种操作，从而提高性能
  */
 public class PoolingByteArrayOutputStream extends ByteArrayOutputStream {
     /**
      * If the {@link #PoolingByteArrayOutputStream(ByteArrayPool)} constructor is called, this is
      * the default size to which the underlying byte array is initialized.
+     */
+    /**
+     * 默认需要缓存的大小
      */
     private static final int DEFAULT_SIZE = 256;
 
@@ -70,6 +75,7 @@ public class PoolingByteArrayOutputStream extends ByteArrayOutputStream {
      */
     private void expand(int i) {
         /* Can the buffer handle @i more bytes, if not expand it */
+        //count是父类中表示已经使用的缓存容量
         if (count + i <= buf.length) {
             return;
         }
