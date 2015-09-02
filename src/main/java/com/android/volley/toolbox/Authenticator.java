@@ -20,6 +20,7 @@ import com.android.volley.AuthFailureError;
 
 /**
  * An interface for interacting with auth tokens.
+ * 身份认证接口，用于基本认证或者摘要认证。这个类是volley用于和身份验证打通的接口，比如Oauth。
  */
 public interface Authenticator {
     /**

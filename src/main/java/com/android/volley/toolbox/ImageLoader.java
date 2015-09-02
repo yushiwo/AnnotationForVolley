@@ -37,13 +37,23 @@ import java.util.LinkedList;
  * and to pass in the default image listener provided by
  * {@link ImageLoader#getImageListener(ImageView, int, int)}. Note that all function calls to
  * this class must be made from the main thead, and all responses will be delivered to the main
- * thread as well.
+ * thread as well.<br />
+ * 封装了ImageRequest得方便使用的图片加载工具类。<br />
+ * (1)可以设置自定义ImageCache，可以是内存缓存，也可以是Disk缓存，将获取的图片缓存起来，重复利用，减少请求 <br />
+ * (2)可以定义图片请求过程中显示的图片和图片请求失败后显示的图片<br />
+ * (3)相同请求（相同地址，相同大小）只发送一个，可以避免重复请求
  */
 public class ImageLoader {
     /** RequestQueue for dispatching ImageRequests onto. */
+    /**
+     * 请求队列
+     */
     private final RequestQueue mRequestQueue;
 
     /** Amount of time to wait after first response arrives before delivering all responses. */
+    /**
+     * 批处理响应延迟
+     */
     private int mBatchResponseDelayMs = 100;
 
     /** The cache implementation to be used as an L1 cache before calling into volley. */
@@ -57,6 +67,9 @@ public class ImageLoader {
             new HashMap<String, BatchedImageRequest>();
 
     /** HashMap of the currently pending responses (waiting to be delivered). */
+    /**
+     * 当前等待分发的响应
+     */
     private final HashMap<String, BatchedImageRequest> mBatchedResponses =
             new HashMap<String, BatchedImageRequest>();
 
@@ -487,6 +500,9 @@ public class ImageLoader {
         }
     }
 
+    /**
+     * 不是在主线程中使用Imageloader,抛出异常
+     */
     private void throwIfNotOnMainThread() {
         if (Looper.myLooper() != Looper.getMainLooper()) {
             throw new IllegalStateException("ImageLoader must be invoked from the main thread.");

@@ -27,7 +27,8 @@ import com.android.volley.toolbox.ImageLoader.ImageListener;
 
 /**
  * Handles fetching an image from a URL as well as the life-cycle of the
- * associated request.
+ * associated request.<br />
+ * 基于ImageLoader，可以加载网络图片的ImageView
  */
 public class NetworkImageView extends ImageView {
     /** The URL of the network image to load */

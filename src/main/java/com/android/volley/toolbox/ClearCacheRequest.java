@@ -16,16 +16,18 @@
 
 package com.android.volley.toolbox;
 
+import android.os.Handler;
+import android.os.Looper;
+
 import com.android.volley.Cache;
 import com.android.volley.NetworkResponse;
 import com.android.volley.Request;
 import com.android.volley.Response;
 
-import android.os.Handler;
-import android.os.Looper;
-
 /**
  * A synthetic request used for clearing the cache.
+ * 用于手动清空Http缓存的请求，将清空缓存的操作当做一个请求。<br />
+ * 这个类实现比较奇葩，在isCancled()方法中做清空操作，因此在NetworkDispather run方法循环中，有可能会通过isCancled执行缓存清空操作。
  */
 public class ClearCacheRequest extends Request<Object> {
     private final Cache mCache;

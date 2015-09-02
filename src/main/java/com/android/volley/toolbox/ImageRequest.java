@@ -16,6 +16,11 @@
 
 package com.android.volley.toolbox;
 
+import android.graphics.Bitmap;
+import android.graphics.Bitmap.Config;
+import android.graphics.BitmapFactory;
+import android.widget.ImageView.ScaleType;
+
 import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.NetworkResponse;
 import com.android.volley.ParseError;
@@ -23,14 +28,11 @@ import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyLog;
 
-import android.graphics.Bitmap;
-import android.graphics.Bitmap.Config;
-import android.graphics.BitmapFactory;
-import android.widget.ImageView.ScaleType;
-
 /**
  * A canned request for getting an image at a given URL and calling
- * back with a decoded Bitmap.
+ * back with a decoded Bitmap.<br />
+ * 继承Request类，代表了一个返回值为Image的请求，将网络返回结果解析为Bitmap类型。
+ * 可以设置图片的最大宽度和最大高度，并计算出合适尺寸返回。每次最多解析一张图片，防止OOM
  */
 public class ImageRequest extends Request<Bitmap> {
     /** Socket timeout in milliseconds for image requests */
@@ -43,12 +45,27 @@ public class ImageRequest extends Request<Bitmap> {
     private static final float IMAGE_BACKOFF_MULT = 2f;
 
     private final Response.Listener<Bitmap> mListener;
+    /**
+     * 图片编码设置
+     */
     private final Config mDecodeConfig;
+    /**
+     * 图片最大宽度
+     */
     private final int mMaxWidth;
+    /**
+     * 图片最大高度
+     */
     private final int mMaxHeight;
+    /**
+     * 图片缩放类型
+     */
     private ScaleType mScaleType;
 
     /** Decoding lock so that we don't decode more than one image at a time (to avoid OOM's) */
+    /**
+     * 图片解码锁，确保一次最多解析一张图片
+     */
     private static final Object sDecodeLock = new Object();
 
     /**
@@ -177,9 +194,9 @@ public class ImageRequest extends Request<Bitmap> {
         } else {
             // If we have to resize this image, first get the natural bounds.
             decodeOptions.inJustDecodeBounds = true;
-            BitmapFactory.decodeByteArray(data, 0, data.length, decodeOptions);
-            int actualWidth = decodeOptions.outWidth;
-            int actualHeight = decodeOptions.outHeight;
+            BitmapFactory.decodeByteArray(data, 0, data.length, decodeOptions);  //只是返回图片的相关信息，如宽高，内存消耗小
+            int actualWidth = decodeOptions.outWidth;  //图片实际宽度
+            int actualHeight = decodeOptions.outHeight; //图片实际高度
 
             // Then compute the dimensions we would ideally like to decode to.
             int desiredWidth = getResizedDimension(mMaxWidth, mMaxHeight,
