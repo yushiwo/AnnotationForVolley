@@ -119,8 +119,8 @@ public class NetworkImageView extends ImageView {
             return;
         }
 
-        // if the URL to be loaded in this view is empty, cancel any old requests and clear the
-        // currently loaded image.
+        // if the URL to be loaded in this view is empty, cancel any old requests and clear the currently loaded image.
+        // 可以通过设置null url来清空imageview显示和cancel request
         if (TextUtils.isEmpty(mUrl)) {
             if (mImageContainer != null) {
                 mImageContainer.cancelRequest();
@@ -131,23 +131,28 @@ public class NetworkImageView extends ImageView {
         }
 
         // if there was an old request in this view, check if it needs to be canceled.
+        // 1. 如果当前view上有request正在执行
         if (mImageContainer != null && mImageContainer.getRequestUrl() != null) {
             if (mImageContainer.getRequestUrl().equals(mUrl)) {
                 // if the request is from the same URL, return.
+                // 如果url相同，那么忽略这次请求
                 return;
             } else {
                 // if there is a pre-existing request, cancel it if it's fetching a different URL.
+                // 如果url不同，那么取消前一次
                 mImageContainer.cancelRequest();
                 setDefaultImageOrNull();
             }
         }
 
         // Calculate the max image width / height to use while ignoring WRAP_CONTENT dimens.
+        // 2. 计算maxWidth和maxHeight。如果view设置了LayoutParams.WRAP_CONTENT，那么不对maxWidth和maxHeight作限制
         int maxWidth = wrapWidth ? 0 : width;
         int maxHeight = wrapHeight ? 0 : height;
 
         // The pre-existing content of this view didn't match the current URL. Load the new image
         // from the network.
+        // 3. 调用ImageLoader的get方法发起image request
         ImageContainer newContainer = mImageLoader.get(mUrl,
                 new ImageListener() {
                     @Override
@@ -200,6 +205,9 @@ public class NetworkImageView extends ImageView {
         loadImageIfNecessary(true);
     }
 
+    /**
+     * 自动回收资源
+     */
     @Override
     protected void onDetachedFromWindow() {
         if (mImageContainer != null) {

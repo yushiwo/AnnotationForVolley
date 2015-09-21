@@ -221,27 +221,34 @@ public class ImageLoader {
             int maxWidth, int maxHeight, ScaleType scaleType) {
 
         // only fulfill requests that were initiated from the main thread.
+        // get方法必须在主线程上运行
         throwIfNotOnMainThread();
 
+        // 1. 生成cache key
         final String cacheKey = getCacheKey(requestUrl, maxWidth, maxHeight, scaleType);
 
         // Try to look up the request in the cache of remote images.
+        // 2. 检查mem cache是否命中
         Bitmap cachedBitmap = mCache.getBitmap(cacheKey);
         if (cachedBitmap != null) {
             // Return the cached bitmap.
+            // 命中直接返回ImageContainer，并调用回调
             ImageContainer container = new ImageContainer(cachedBitmap, requestUrl, null, null);
             imageListener.onResponse(container, true);
             return container;
         }
 
         // The bitmap did not exist in the cache, fetch it!
+        // 3. mem cache miss，新建ImageContainer
         ImageContainer imageContainer =
                 new ImageContainer(null, requestUrl, cacheKey, imageListener);
 
         // Update the caller to let them know that they should use the default bitmap.
+        // 4. 回调listener，这里应该显示default image
         imageListener.onResponse(imageContainer, true);
 
         // Check to see if a request is already in-flight.
+        // 5. 检查是否有相同request在执行
         BatchedImageRequest request = mInFlightRequests.get(cacheKey);
         if (request != null) {
             // If it is, add this request to the list of listeners.
@@ -249,17 +256,27 @@ public class ImageLoader {
             return imageContainer;
         }
 
-        // The request is not already in flight. Send the new request to the network and
-        // track it.
+        // The request is not already in flight. Send the new request to the network and track it.
+        // 6. 新建ImageRequeue，放到Request中，其后步骤跟单独发起ImageRequest相同
         Request<Bitmap> newRequest = makeImageRequest(requestUrl, maxWidth, maxHeight, scaleType,
                 cacheKey);
 
         mRequestQueue.add(newRequest);
+        // 7. 标记当前执行的cache key
         mInFlightRequests.put(cacheKey,
                 new BatchedImageRequest(newRequest, imageContainer));
         return imageContainer;
     }
 
+    /**
+     * 发送图片请求
+     * @param requestUrl
+     * @param maxWidth
+     * @param maxHeight
+     * @param scaleType
+     * @param cacheKey
+     * @return
+     */
     protected Request<Bitmap> makeImageRequest(String requestUrl, int maxWidth, int maxHeight,
             ScaleType scaleType, final String cacheKey) {
         return new ImageRequest(requestUrl, new Listener<Bitmap>() {
@@ -291,13 +308,16 @@ public class ImageLoader {
      */
     protected void onGetImageSuccess(String cacheKey, Bitmap response) {
         // cache the image that was fetched.
+        // 8. 放到mem cache中
         mCache.putBitmap(cacheKey, response);
 
         // remove the request from the list of in-flight requests.
+        // 9. request完成，清除标记
         BatchedImageRequest request = mInFlightRequests.remove(cacheKey);
 
         if (request != null) {
             // Update the response bitmap.
+            // 10. 更新BatchedImageRequest中的bitmap
             request.mResponseBitmap = response;
 
             // Send the batched response
@@ -462,6 +482,7 @@ public class ImageLoader {
     }
 
     /**
+     * batchResponse()的作用是确保某一个batch的第一个response能够在mBatchResponseDelayMs时间间隔后在主线程上执行。
      * Starts the runnable for batched delivery of responses if it is not already started.
      * @param cacheKey The cacheKey of the response being delivered.
      * @param request The BatchedImageRequest to be delivered.
@@ -470,7 +491,7 @@ public class ImageLoader {
         mBatchedResponses.put(cacheKey, request);
         // If we don't already have a batch delivery runnable in flight, make a new one.
         // Note that this will be used to deliver responses to all callers in mBatchedResponses.
-        if (mRunnable == null) {
+        if (mRunnable == null) {  // 在batch request被清空前只会进来一次
             mRunnable = new Runnable() {
                 @Override
                 public void run() {
@@ -491,7 +512,7 @@ public class ImageLoader {
                         }
                     }
                     mBatchedResponses.clear();
-                    mRunnable = null;
+                    mRunnable = null;  // 将runnable设为null才可以开始下一批reponse
                 }
 
             };

@@ -188,23 +188,27 @@ public class ImageRequest extends Request<Bitmap> {
         byte[] data = response.data;
         BitmapFactory.Options decodeOptions = new BitmapFactory.Options();
         Bitmap bitmap = null;
+        // 如果mMaxWidth和mMaxHeight都为0，则按照bitmap实际大小进行decode
         if (mMaxWidth == 0 && mMaxHeight == 0) {
             decodeOptions.inPreferredConfig = mDecodeConfig;
             bitmap = BitmapFactory.decodeByteArray(data, 0, data.length, decodeOptions);
-        } else {
+        } else {// 根据mMaxWidth、mMaxHeight和scaleType来进行decode
             // If we have to resize this image, first get the natural bounds.
+            // 1. 先decode一次，求出图片的实际大小
             decodeOptions.inJustDecodeBounds = true;
             BitmapFactory.decodeByteArray(data, 0, data.length, decodeOptions);  //只是返回图片的相关信息，如宽高，内存消耗小
             int actualWidth = decodeOptions.outWidth;  //图片实际宽度
             int actualHeight = decodeOptions.outHeight; //图片实际高度
 
             // Then compute the dimensions we would ideally like to decode to.
+            // 2. 求出根据给定的参数的目标宽度和长度
             int desiredWidth = getResizedDimension(mMaxWidth, mMaxHeight,
                     actualWidth, actualHeight, mScaleType);
             int desiredHeight = getResizedDimension(mMaxHeight, mMaxWidth,
                     actualHeight, actualWidth, mScaleType);
 
             // Decode to the nearest power of two scaling factor.
+            // 3. 再用目标宽度和长度decode bitmap data
             decodeOptions.inJustDecodeBounds = false;
             // TODO(ficus): Do we need this or is it okay since API 8 doesn't support it?
             // decodeOptions.inPreferQualityOverSpeed = PREFER_QUALITY_OVER_SPEED;
@@ -214,6 +218,7 @@ public class ImageRequest extends Request<Bitmap> {
                 BitmapFactory.decodeByteArray(data, 0, data.length, decodeOptions);
 
             // If necessary, scale down to the maximal acceptable size.
+            // 4. 再次进行downscale
             if (tempBitmap != null && (tempBitmap.getWidth() > desiredWidth ||
                     tempBitmap.getHeight() > desiredHeight)) {
                 bitmap = Bitmap.createScaledBitmap(tempBitmap,
@@ -227,6 +232,7 @@ public class ImageRequest extends Request<Bitmap> {
         if (bitmap == null) {
             return Response.error(new ParseError(response));
         } else {
+            // 最后将结果包装成Response返回给Delivery
             return Response.success(bitmap, HttpHeaderParser.parseCacheHeaders(response));
         }
     }

@@ -54,11 +54,13 @@ public class HurlStack implements HttpStack {
 
     /**
      * An interface for transforming URLs before use.
+     * 一个在使用前变换URLs的接口
      */
     public interface UrlRewriter {
         /**
          * Returns a URL to use instead of the provided one, or null to indicate
-         * this URL should not be used at all.
+         * this URL should not be used at all. <br />
+         * 重写URL
          */
         public String rewriteUrl(String originalUrl);
     }
